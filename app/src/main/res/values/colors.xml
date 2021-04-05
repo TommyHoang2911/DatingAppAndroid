@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FF4081</color>
-    <color name="colorPrimaryDark">#FF4081</color>
+    <color name="colorPrimary">#F9005C</color>
+    <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#FF4081</color>
     <color name="transparentPink">#99FF4081</color>
 
@@ -9,10 +9,20 @@
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="link_blue">#1781DB</color>
-    <color name="light_grey">#eeeeee</color>
+    <color name="light_grey">#D1CECE</color>
     <color name="textColor">#111111</color>
+    <color name="text_color_adapter_group">#626262</color>
 
     <color name="likegreen">#00CC33</color>
     <color name="dislikered">#FF2400</color>
+
+    <color name="message_text_sender">#ffff</color>
+    <color name="message_text_receiver">#111111</color>
+    <color name="message_background_sender">#F9005C</color>
+    <color name="message_background_receiver">#E9E9E9</color>
+    <color name="button_send_tint">#F91A6B</color>
+    <color name="button_send_tint_not_working">#7F7D7D</color>
+
+    <color name="top_navigation">#00CC33</color>
 
 </resources>

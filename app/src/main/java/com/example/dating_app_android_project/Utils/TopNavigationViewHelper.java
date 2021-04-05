@@ -14,10 +14,6 @@ import com.example.dating_app_android_project.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
-/**
- * Created by yuxuanli on 5/9/18.
- */
-
 public class TopNavigationViewHelper {
 
     private static final String TAG = "TopNavigationViewHelper";
@@ -29,10 +25,10 @@ public class TopNavigationViewHelper {
         tv.enableItemShiftingMode(false);
         tv.enableShiftingMode(false);
         tv.setTextVisibility(false);
-        tv.setIconSize(35, 35);
+        tv.setIconSize(30, 30);
     }
 
-    public static void enableNavigation(final Context context, BottomNavigationViewEx view) {
+    public static void enableNavigation(final Context context, final BottomNavigationViewEx view) {
         view.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {

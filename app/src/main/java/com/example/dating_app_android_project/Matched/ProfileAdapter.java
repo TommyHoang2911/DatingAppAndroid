@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.example.dating_app_android_project.Conversation.Object.GroupObject;
 import com.example.dating_app_android_project.R;
 import com.example.dating_app_android_project.Utils.User;
 
@@ -21,11 +22,11 @@ import java.util.List;
 /**
  * Created by yuxuanli on 5/20/18.
  */
-public class ProfileAdapter extends ArrayAdapter<User>{
+public class ProfileAdapter extends ArrayAdapter<GroupObject>{
     private int resourceId;
     private Context mContext;
 
-    public ProfileAdapter(@NonNull Context context, int resource, @NonNull List<User> objects) {
+    public ProfileAdapter(@NonNull Context context, int resource, @NonNull List<GroupObject> objects) {
         super(context, resource, objects);
         resourceId = resource;
         this.mContext = context;
@@ -34,7 +35,7 @@ public class ProfileAdapter extends ArrayAdapter<User>{
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        User user = getItem(position);
+        GroupObject groupObject = getItem(position);
 
         //improve the efficiency
         View view;
@@ -53,7 +54,7 @@ public class ProfileAdapter extends ArrayAdapter<User>{
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        String profileImageUrl = user.getProfileImageUrl();
+        String profileImageUrl = groupObject.getUserMatch().getProfileImageUrl();
         switch (profileImageUrl) {
             case "defaultFemale":
                 Glide.with(mContext).load(R.drawable.default_woman).into(viewHolder.personPic);
@@ -65,7 +66,7 @@ public class ProfileAdapter extends ArrayAdapter<User>{
                 Glide.with(mContext).load(profileImageUrl).into(viewHolder.personPic);
                 break;
         }
-        viewHolder.personName.setText(user.getUsername());
+        viewHolder.personName.setText(groupObject.getUserMatch().getUsername());
         viewHolder.imageButton.setFocusable(false);
 
         return view;

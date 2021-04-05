@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +34,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
@@ -68,6 +72,7 @@ public class MainActivity extends Activity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference usersDb;
+    private FirebaseFirestore mFirebaseFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +80,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         usersDb = FirebaseDatabase.getInstance().getReference();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
         mNotificationHelper = new NotificationHelper(this);
 
         setupFirebaseAuth();
@@ -194,6 +200,25 @@ public class MainActivity extends Activity {
 
                     usersDb.child(lookforSex).child(dataSnapshot.getKey()).child("connections").child("match_result").child(currentUID).setValue(true);
                     usersDb.child(userSex).child(currentUID).child("connections").child("match_result").child(dataSnapshot.getKey()).setValue(true);
+
+                    // Create group in Realtime DB and Cloud DB
+                    String key = mFirebaseFirestore.collection("group").document().getId();
+
+                    DocumentReference groupInfoDb = mFirebaseFirestore.collection("group").document(key);
+
+                    ArrayList<String> idUserList = new ArrayList<>();
+                    idUserList.add(dataSnapshot.getKey());
+                    idUserList.add(currentUID);
+
+                    HashMap<String, String> newGroupMap = new HashMap<>();
+                    newGroupMap.put("idGroup", key);
+                    groupInfoDb.set(newGroupMap);
+                    groupInfoDb.update("members", idUserList);
+                    groupInfoDb.update("createTime", FieldValue.serverTimestamp());
+
+                    usersDb.child(lookforSex).child(dataSnapshot.getKey()).child("group").child(currentUID).setValue(key);
+                    usersDb.child(userSex).child(currentUID).child("group").child(dataSnapshot.getKey()).setValue(key);
+
                 }
             }
 
@@ -414,6 +439,7 @@ public class MainActivity extends Activity {
         Menu menu = tvEx.getMenu();
         MenuItem menuItem = menu.getItem(ACTIVITY_NUM);
         menuItem.setChecked(true);
+
     }
 
 

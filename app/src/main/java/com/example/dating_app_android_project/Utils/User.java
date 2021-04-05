@@ -1,6 +1,7 @@
 package com.example.dating_app_android_project.Utils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by yuxuanli on 4/10/18.
@@ -22,7 +23,6 @@ public class User implements Serializable {
     private String profileImageUrl;
     private double latitude;
     private double longtitude;
-
 
     public User() {
     }
@@ -160,8 +160,6 @@ public class User implements Serializable {
     // Added new attribute called date of birth.
     public String getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
-
-
 
     @Override
     public String toString() {

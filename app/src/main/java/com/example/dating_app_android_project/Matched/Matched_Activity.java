@@ -14,8 +14,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.dating_app_android_project.Conversation.ConversationActivity;
+import com.example.dating_app_android_project.Conversation.Object.GroupObject;
 import com.example.dating_app_android_project.Login.Login;
 import com.example.dating_app_android_project.R;
 import com.example.dating_app_android_project.Utils.FirebaseMethods;
@@ -30,11 +33,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 
 public class Matched_Activity extends AppCompatActivity {
@@ -47,11 +50,12 @@ public class Matched_Activity extends AppCompatActivity {
     private double latitude = 37.349642;
     private double longtitude = -121.938987;
     private EditText search;
+    private ArrayList<String> idGroupList;
 
     ProfileAdapter mAdapter;
 
-    List<User> matchList = new ArrayList<>();
-    List<User> copyList = new ArrayList<>();
+    List<GroupObject> matchList = new ArrayList<>();
+    List<GroupObject> copyList = new ArrayList<>();
     GPS gps;
 
     //firebase
@@ -59,6 +63,7 @@ public class Matched_Activity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference dbRef;
     private FirebaseMethods firebaseMethods;
+    private FirebaseFirestore mFirebaseFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,7 @@ public class Matched_Activity extends AppCompatActivity {
         userId = mAuth.getInstance().getCurrentUser().getUid();
         gps = new GPS(this);
         dbRef = FirebaseDatabase.getInstance().getReference();
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
 
         checkUserSex();
 
@@ -89,7 +95,7 @@ public class Matched_Activity extends AppCompatActivity {
         });
     }
 
-    private void searchFunc(){
+    private void searchFunc() {
         search = (EditText) findViewById(R.id.searchBar);
         search.addTextChangedListener(new TextWatcher() {
             @Override
@@ -113,9 +119,9 @@ public class Matched_Activity extends AppCompatActivity {
         if (text.length() != 0) {
             if (matchList.size() != 0) {
                 matchList.clear();
-                for (User user : copyList) {
-                    if (user.getUsername().toLowerCase(Locale.getDefault()).contains(text)) {
-                        matchList.add(user);
+                for (GroupObject groupObject : copyList) {
+                    if (groupObject.getUserMatch().getUsername().toLowerCase(Locale.getDefault()).contains(text)) {
+                        matchList.add(groupObject);
                     }
                 }
             }
@@ -134,7 +140,7 @@ public class Matched_Activity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
                 if (dataSnapshot.getKey().equals(userId)) {
-                    Log.d(TAG, "onChildAdded: the sex is male" );
+                    Log.d(TAG, "onChildAdded: the sex is male");
                     userSex = "male";
                     //update the location
                     latitude = dataSnapshot.getValue(User.class).getLatitude();
@@ -168,7 +174,7 @@ public class Matched_Activity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
                 if (dataSnapshot.getKey().equals(userId)) {
-                    Log.d(TAG, "onChildAdded: the sex is female" );
+                    Log.d(TAG, "onChildAdded: the sex is female");
                     userSex = "female";
 
                     //update the location
@@ -198,62 +204,55 @@ public class Matched_Activity extends AppCompatActivity {
         });
     }
 
-    private void findMatchUID(){
+    private void findMatchUID() {
         Log.d(TAG, "findMatchUID: start to find match");
+        idGroupList = new ArrayList<>();
+        final DatabaseReference groupRef = dbRef.child(userSex).child(userId).child("group");
 
-        final DatabaseReference matchRef = dbRef.child(userSex).child(userId).child("connections").child("match_result");
-        final int[] count = {0};
-        matchRef.addChildEventListener(new ChildEventListener() {
+        groupRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                final String uid = dataSnapshot.getKey();
-                Log.d(TAG, "onDataChange: need to find uid " + uid);
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    final String uid = ds.getKey();
+                    final String idGroup = (String) ds.getValue();
 
-                dbRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        User user = firebaseMethods.getUser(dataSnapshot, lookforSex, uid);
-                        if (!checkDup(user)) {
-                            matchList.add(user);
-                            copyList.add(user);
-                            mAdapter.notifyDataSetChanged();
-                            Log.d(TAG, "onDataChange: match list size is " + matchList.size());
+                    Log.d(TAG, "onDataChange: uid :" + uid + " - idGroup :" + idGroup);
+
+                    dbRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = firebaseMethods.getUser(dataSnapshot, lookforSex, uid);
+                            if (!checkDup(user)) {
+                                Log.d(TAG, "Day la idGroup :");
+                                GroupObject groupObject = new GroupObject(idGroup, user);
+                                matchList.add(groupObject);
+                                copyList.add(groupObject);
+                                mAdapter.notifyDataSetChanged();
+                                Log.d(TAG, "onDataChange: match list size is " + matchList.size());
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: test cancel" );
-                    }
-                });
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.d(TAG, "onCancelled: test cancel");
+                        }
+                    });
+
+                }
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
 
             }
         });
     }
 
+
     private boolean checkDup(User user) {
         if (matchList.size() != 0) {
-            for (User u : matchList) {
-                if (u.getUsername() == user.getUsername()) {
+            for (GroupObject groupObject : matchList) {
+                if (groupObject.getUserMatch().getUsername() == user.getUsername()) {
                     return true;
                 }
             }
@@ -264,13 +263,15 @@ public class Matched_Activity extends AppCompatActivity {
 
     private void checkClickedItem(int position) {
 
-        User user = matchList.get(position);
+        GroupObject groupObject = matchList.get(position);
+        User user = groupObject.getUserMatch();
         //calculate distance
         int distance = gps.calculateDistance(latitude, longtitude, user.getLatitude(), user.getLongtitude());
 
-        Intent intent = new Intent(this, ProfileCheckinMatched.class);
-        intent.putExtra("classUser", user);
-        intent.putExtra("distance", distance);
+        Intent intent = new Intent(this, ConversationActivity.class);
+//        intent.putExtra("classUser", user);
+//        intent.putExtra("distance", distance);
+        intent.putExtra("groupObject", groupObject);
         startActivity(intent);
     }
 
@@ -288,10 +289,10 @@ public class Matched_Activity extends AppCompatActivity {
     /**
      * Setup the firebase auth object
      */
-    private void setupFirebaseAuth(){
+    private void setupFirebaseAuth() {
         mAuth = FirebaseAuth.getInstance();
 
-        mAuthListener = new FirebaseAuth.AuthStateListener(){
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
 
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {

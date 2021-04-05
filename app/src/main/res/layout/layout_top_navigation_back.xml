@@ -3,7 +3,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="60dp"
         android:background="@drawable/white_grey_border_bottom">
 
         <ImageButton
@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:text="PinkMoon"
+            android:text="Back"
             android:textColor="@color/colorPrimary"
             android:layout_gravity="center_vertical"
             android:textSize="20sp"/>

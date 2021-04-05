@@ -23,6 +23,7 @@
         <activity android:name=".Login.Login" />
         <activity android:name=".Login.RegisterBasicInfo" />
         <activity android:name=".Matched.Matched_Activity" />
+        <activity android:name=".Conversation.ConversationActivity"/>
         <activity android:name=".Profile.Profile_Activity" />
         <activity android:name=".Main.ProfileCheckinMain" />
         <activity android:name=".Matched.ProfileCheckinMatched" />
